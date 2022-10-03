@@ -1,0 +1,35 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/GoFundMe.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract GoFundMe {\n    address public immutable i_owner;\n    address[] private s_funders;\n    mapping(address => uint) private s_addressToAmountFunded;\n\n    modifier onlyOwner() {\n        require(msg.sender == i_owner);\n        _;\n    }\n\n    constructor() {\n        i_owner = msg.sender;\n    }\n\n    function fund() public payable {\n        s_addressToAmountFunded[msg.sender] = msg.value;\n        s_funders.push(msg.sender);\n    }\n\n    function withdraw() public payable onlyOwner {\n        payable(msg.sender).transfer(address(this).balance);\n        for (\n            uint256 funder_idx = 0;\n            funder_idx < s_funders.length;\n            funder_idx++\n        ) {\n            s_addressToAmountFunded[s_funders[funder_idx]] = 0;\n        }\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
