@@ -1,21 +1,35 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
+import "./PriceConverter.sol";
+
+error GoFundMe__OnlyOwner();
+error GoFundMe__NotEnoughETH();
+
 contract GoFundMe {
+    using PriceConverter for uint256;
+
     address public immutable i_owner;
     address[] private s_funders;
     mapping(address => uint) public s_addressToAmountFunded;
+    uint256 public immutable i_min_usd;
+    AggregatorV3Interface public immutable priceFeed;
 
     modifier onlyOwner() {
-        require(msg.sender == i_owner);
+        if (msg.sender != i_owner) revert GoFundMe__OnlyOwner();
         _;
     }
 
-    constructor() {
+    constructor(uint256 _min_usd, AggregatorV3Interface priceFeedAddress) {
         i_owner = msg.sender;
+        i_min_usd = _min_usd;
+        priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
 
     function fund() public payable {
+        if (msg.value.getConversionRate(priceFeed) < i_min_usd)
+            revert GoFundMe__NotEnoughETH();
         s_addressToAmountFunded[msg.sender] = msg.value;
         s_funders.push(msg.sender);
     }

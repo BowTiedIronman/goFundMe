@@ -9,7 +9,7 @@ describe("GoFundMe", () => {
   let deployer: SignerWithAddress
   let otherWallet: SignerWithAddress
 
-  const sendValue = ethers.utils.parseEther("2")
+  const sendValue = ethers.utils.parseEther("1")
 
   beforeEach(async function () {
     const accounts = await ethers.getSigners()
@@ -17,7 +17,6 @@ describe("GoFundMe", () => {
     otherWallet = accounts[1]
     await deployments.fixture(["all"])
     goFundMe = await ethers.getContract("GoFundMe", deployer)
-    console.log({ goFundMe })
   })
 
   describe("constructor", () => {
@@ -28,11 +27,18 @@ describe("GoFundMe", () => {
     })
   })
 
+  describe("fund revert", () => {
+    it("should throw not enough eth", async () => {
+      await expect(
+        goFundMe.fund({ value: ethers.utils.parseEther("0.001") })
+      ).to.be.revertedWithCustomError(goFundMe, "GoFundMe__NotEnoughETH")
+    })
+  })
+
   describe("fund", () => {
     beforeEach(async () => {
       await goFundMe.fund({ value: sendValue })
     })
-
     it("updates the amount in map", async () => {
       const response = await goFundMe.s_addressToAmountFunded(deployer.address)
       assert.equal(response.toString(), sendValue.toString())
@@ -54,8 +60,6 @@ describe("GoFundMe", () => {
       const { gasUsed, effectiveGasPrice } = transactionReceipt
       const gasCost = gasUsed.mul(effectiveGasPrice)
 
-      const withdrawedContractBalance =
-        await await goFundMe.provider.getBalance(goFundMe.address)
       const withdrawedDeployerBalance =
         await await goFundMe.provider.getBalance(deployer.address)
       const startVal = withdrawedDeployerBalance.add(gasCost).toString()
@@ -66,11 +70,9 @@ describe("GoFundMe", () => {
       )
     })
     it("should not allow to withdraw from other acccounts", async () => {
-      beforeEach(async () => {
-        await goFundMe.fund({ value: sendValue })
-        goFundMeOtherWallet = await ethers.getContract("GoFundMe", otherWallet)
-      })
-      await expect(goFundMeOtherWallet.withdraw()).to.be.reverted
+      await expect(
+        goFundMe.connect(otherWallet).withdraw()
+      ).to.be.revertedWithCustomError(goFundMe, "GoFundMe__OnlyOwner")
     })
   })
 })

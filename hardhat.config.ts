@@ -9,7 +9,16 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY ?? ""
 const PRIVATE_KEY = process.env.PRIVATE_KEY ?? ""
 
 const config: HardhatUserConfig = {
-  solidity: "0.8.17",
+  solidity: {
+    compilers: [
+      {
+        version: "0.8.17"
+      },
+      {
+        version: "0.6.6"
+      }
+    ]
+  },
   networks: {
     goerli: { chainId: 5, url: GOERLI_RPC_URL, accounts: [PRIVATE_KEY] }
   },
@@ -25,7 +34,7 @@ const config: HardhatUserConfig = {
   },
   namedAccounts: {
     deployer: {
-      default: 0, //
+      default: 0,
       1: 0
     }
   }
