@@ -10,9 +10,9 @@ error GoFundMe__NotEnoughETH();
 contract GoFundMe {
     using PriceConverter for uint256;
 
-    address public immutable i_owner;
+    address private immutable i_owner;
     address[] private s_funders;
-    mapping(address => uint) public s_addressToAmountFunded;
+    mapping(address => uint) private s_addressToAmountFunded;
     uint256 public immutable i_min_usd;
     AggregatorV3Interface public immutable priceFeed;
 
@@ -47,5 +47,21 @@ contract GoFundMe {
 
     function getOwner() public view returns (address) {
         return i_owner;
+    }
+
+    function getFunders() public view onlyOwner returns (address[] memory) {
+        return s_funders;
+    }
+
+    function getMinUsd() public view returns (uint256) {
+        return i_min_usd;
+    }
+
+    fallback() external payable {
+        fund();
+    }
+
+    receive() external payable {
+        fund();
     }
 }
