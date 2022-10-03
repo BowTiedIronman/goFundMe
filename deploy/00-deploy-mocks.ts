@@ -12,7 +12,6 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
 
   if (chainId == 31337) {
     log("local chain detected. using mocks...")
-    // MockV3Aggregator should be in the contracts folder
     await deploy("MockV3Aggregator", {
       contract: "MockV3Aggregator",
       from: deployer,
