@@ -1,6 +1,7 @@
 import { network } from "hardhat"
 import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { networkConfig } from "../helper-hardhat-config"
+import verify from "../utils/verify"
 
 module.exports = async (hre: HardhatRuntimeEnvironment) => {
   const { deploy, log, get } = hre.deployments
@@ -18,15 +19,18 @@ module.exports = async (hre: HardhatRuntimeEnvironment) => {
     ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed
   }
 
-  const minUsd = 50
+  const minUsd = 10
   const args: any[] = [minUsd, ethUsdPriceFeedAddress]
   const goFundMe = await deploy("GoFundMe", {
     from: deployer,
     args: args,
     log: true,
-    waitConfirmations: 1
+    waitConfirmations: 5
   })
   log("----------------------------------")
+  if (chainId !== 31337 && process.env.ETHERSCAN_API_KEY) {
+    await verify(goFundMe.address, args)
+  }
 }
 
 module.exports.tags = ["all", "fundme"]
