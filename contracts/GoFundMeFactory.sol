@@ -14,7 +14,7 @@ contract GoFundMeFactory {
     }
 
     function createGoFundMeContract(uint256 minUsd) public {
-        GoFundMe fund = new GoFundMe(minUsd, priceFeed);
+        GoFundMe fund = new GoFundMe(minUsd, priceFeed, msg.sender);
         goFundMeArray.push(fund);
     }
 

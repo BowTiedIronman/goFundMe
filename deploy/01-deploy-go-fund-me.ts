@@ -21,7 +21,7 @@ const deployFundMe: DeployFunction = async function (
   }
 
   const minUsd = 10
-  const args: any[] = [minUsd, ethUsdPriceFeedAddress]
+  const args: any[] = [minUsd, ethUsdPriceFeedAddress, deployer]
   const goFundMe = await deploy("GoFundMe", {
     from: deployer,
     args: args,

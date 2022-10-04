@@ -21,8 +21,12 @@ contract GoFundMe {
         _;
     }
 
-    constructor(uint256 _min_usd, AggregatorV3Interface priceFeedAddress) {
-        i_owner = msg.sender;
+    constructor(
+        uint256 _min_usd,
+        AggregatorV3Interface priceFeedAddress,
+        address owner
+    ) {
+        i_owner = owner;
         i_min_usd = _min_usd;
         priceFeed = AggregatorV3Interface(priceFeedAddress);
     }
