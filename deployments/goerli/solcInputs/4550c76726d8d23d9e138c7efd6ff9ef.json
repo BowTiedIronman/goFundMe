@@ -1,0 +1,44 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/GoFundMeFactory.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\nimport \"./GoFundMe.sol\";\n\ncontract GoFundMeFactory {\n    GoFundMe[] public goFundMeArray;\n\n    AggregatorV3Interface public immutable priceFeed;\n\n    constructor(AggregatorV3Interface priceFeedAddress) {\n        priceFeed = AggregatorV3Interface(priceFeedAddress);\n    }\n\n    function createGoFundMeContract(uint256 minUsd) public {\n        GoFundMe fund = new GoFundMe(minUsd, priceFeed);\n        goFundMeArray.push(fund);\n    }\n\n    function getFundAmount(uint256 fundIndex) public view returns (uint256) {\n        GoFundMe fund = goFundMeArray[fundIndex];\n        uint256 bal = address(fund).balance;\n        return bal;\n    }\n}\n"
+    },
+    "contracts/GoFundMe.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\nimport \"./PriceConverter.sol\";\n\nerror GoFundMe__OnlyOwner();\nerror GoFundMe__NotEnoughETH();\n\ncontract GoFundMe {\n    using PriceConverter for uint256;\n\n    address private immutable i_owner;\n    address[] private s_funders;\n    mapping(address => uint) public s_addressToAmountFunded;\n    uint256 public immutable i_min_usd;\n    AggregatorV3Interface public immutable priceFeed;\n\n    modifier onlyOwner() {\n        if (msg.sender != i_owner) revert GoFundMe__OnlyOwner();\n        _;\n    }\n\n    constructor(uint256 _min_usd, AggregatorV3Interface priceFeedAddress) {\n        i_owner = msg.sender;\n        i_min_usd = _min_usd;\n        priceFeed = AggregatorV3Interface(priceFeedAddress);\n    }\n\n    function fund() public payable {\n        if (msg.value.getConversionRate(priceFeed) < i_min_usd)\n            revert GoFundMe__NotEnoughETH();\n        s_addressToAmountFunded[msg.sender] = msg.value;\n        s_funders.push(msg.sender);\n    }\n\n    function withdraw() public payable onlyOwner {\n        payable(msg.sender).transfer(address(this).balance);\n        for (\n            uint256 funder_idx = 0;\n            funder_idx < s_funders.length;\n            funder_idx++\n        ) {\n            s_addressToAmountFunded[s_funders[funder_idx]] = 0;\n        }\n    }\n\n    function getOwner() public view returns (address) {\n        return i_owner;\n    }\n\n    function getFunders() public view onlyOwner returns (address[] memory) {\n        return s_funders;\n    }\n\n    function getMinUsd() public view returns (uint256) {\n        return i_min_usd;\n    }\n\n    fallback() external payable {\n        fund();\n    }\n\n    receive() external payable {\n        fund();\n    }\n}\n"
+    },
+    "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(uint80 _roundId)\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n\n  function latestRoundData()\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n}\n"
+    },
+    "contracts/PriceConverter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\n\nlibrary PriceConverter {\n    function getLatestPrice(AggregatorV3Interface priceFeed)\n        internal\n        view\n        returns (uint256)\n    {\n        (, int price, , , ) = priceFeed.latestRoundData();\n        return uint256(price); // 129158733925\n    }\n\n    function getConversionRate(\n        uint256 ethAmount,\n        AggregatorV3Interface priceFeed\n    ) internal view returns (uint256) {\n        uint256 price = getLatestPrice(priceFeed) / 10**8; //  1291.58733925\n        uint256 value = (ethAmount * price) / (10**18);\n        return value;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
