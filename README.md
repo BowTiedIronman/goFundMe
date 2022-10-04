@@ -1,13 +1,7 @@
-# Sample Hardhat Project
+# GoFundMe Factory
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+## About the Project
+This project demonstrates a decentralized alternative to gofundme.com. Users can create & deploy a GoFundMe contract by calling createGoFundMeContract method which takes the minimum usd value per donation as argument.
 
-Try running some of the following tasks:
+You can find the project on the Goerli testnet https://goerli.etherscan.io/address/0x02d32B135F2f25f49bE2f4Be57A3B0C1097b6931#code
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
-```
