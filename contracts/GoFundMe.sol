@@ -12,7 +12,7 @@ contract GoFundMe {
 
     address private immutable i_owner;
     address[] private s_funders;
-    mapping(address => uint) private s_addressToAmountFunded;
+    mapping(address => uint) public s_addressToAmountFunded;
     uint256 public immutable i_min_usd;
     AggregatorV3Interface public immutable priceFeed;
 

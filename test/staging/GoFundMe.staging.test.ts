@@ -6,7 +6,6 @@ import { GoFundMe } from "../../typechain-types"
 network.config.chainId === 31337
   ? describe.skip
   : describe("FundMe Staging Tests", async function () {
-      console.log("running staging on chainid ")
       let fundMe: GoFundMe
       let deployer: SignerWithAddress
 

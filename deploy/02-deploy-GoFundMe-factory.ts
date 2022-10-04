@@ -1,12 +1,12 @@
-import { HardhatRuntimeEnvironment } from "hardhat/types"
+import { network } from "hardhat"
 import { DeployFunction } from "hardhat-deploy/types"
-import verify from "../utils/verify"
+import { HardhatRuntimeEnvironment } from "hardhat/types"
 import { networkConfig } from "../helper-hardhat-config"
+import verify from "../utils/verify"
 
-const deployFundMe: DeployFunction = async function (
+const deployFundMeFactory: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ) {
-  console.log("-----deploy-contract------")
   const { getNamedAccounts, deployments, network } = hre
   const { deploy, log } = deployments
   const { deployer } = await getNamedAccounts()
@@ -20,21 +20,18 @@ const deployFundMe: DeployFunction = async function (
     ethUsdPriceFeedAddress = networkConfig[chainId].ethUsdPriceFeed!
   }
 
-  const minUsd = 10
-  const args: any[] = [minUsd, ethUsdPriceFeedAddress]
-  const goFundMe = await deploy("GoFundMe", {
+  const args: any[] = [ethUsdPriceFeedAddress]
+  const goFundMeFactory = await deploy("GoFundMeFactory", {
     from: deployer,
     args: args,
     log: true,
     waitConfirmations: 1
   })
-  log("-------------Deployed-Go-Fund-Me---------------------")
+  log("--------------Deployed-Factory--------------------")
   if (chainId !== 31337 && process.env.ETHERSCAN_API_KEY) {
-    await verify(goFundMe.address, args)
+    await verify(goFundMeFactory.address, args)
   }
 }
 
-export default deployFundMe
-//  tags are useful when you dont want to deploy all scripts
-// yarn hardhat deploy --netowrk rinkeby --tags fundMe
-deployFundMe.tags = ["all", "fundMe"]
+export default deployFundMeFactory
+deployFundMeFactory.tags = ["all", "factory"]

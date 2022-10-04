@@ -7,7 +7,6 @@ network.config.chainId !== 31337
   ? describe.skip
   : describe("GoFundMe", () => {
       let goFundMe: GoFundMe
-      let goFundMeOtherWallet: GoFundMe
       let deployer: SignerWithAddress
       let otherWallet: SignerWithAddress
 
